@@ -1,0 +1,91 @@
+import flet as ft
+import sqlite3
+from datetime import datetime
+
+# 1. Función para inicializar o conectar la DB
+def ejecutar_query(query, params=(), fetch=False):
+    conn = sqlite3.connect("mecanica_predictiva.db")
+    cursor = conn.cursor()
+    cursor.execute(query, params)
+    data = cursor.fetchall() if fetch else None
+    conn.commit()
+    conn.close()
+    return data
+
+def db_init():
+    ejecutar_query('''CREATE TABLE IF NOT EXISTS escaneos 
+                     (id INTEGER PRIMARY KEY, sensor TEXT, valor REAL, estado TEXT, fecha TEXT)''')
+
+def main(page: ft.Page):
+    page.title = "AutoScan Pro: Historial de Fallas"
+    page.theme_mode = ft.ThemeMode.DARK
+    page.scroll = "adaptive"
+
+    # Componentes de UI
+    sensor_input = ft.TextField(label="Sensor (ej. Presión Aceite)", width=250)
+    valor_input = ft.TextField(label="Lectura Actual", width=250)
+    tabla_historial = ft.DataTable(
+        columns=[
+            ft.DataColumn(ft.Text("Fecha")),
+            ft.DataColumn(ft.Text("Sensor")),
+            ft.DataColumn(ft.Text("Valor")),
+            ft.DataColumn(ft.Text("Estado")),
+        ],
+        rows=[],
+    )
+
+    def refrescar_tabla():
+        # Limpiar filas actuales
+        tabla_historial.rows.clear()
+        # Consultar DB (Últimos 10 escaneos)
+        datos = ejecutar_query("SELECT fecha, sensor, valor, estado FROM escaneos ORDER BY id DESC LIMIT 10", fetch=True)
+        
+        for fila in datos:
+            # Color basado en el estado para identificar errores rápido
+            color_texto = ft.colors.RED_ACCENT if "ADVERTENCIA" in fila[3] else ft.colors.GREEN_ACCENT
+            
+            tabla_historial.rows.append(
+                ft.DataRow(
+                    cells=[
+                        ft.DataCell(ft.Text(fila[0])),
+                        ft.DataCell(ft.Text(fila[1])),
+                        ft.DataCell(ft.Text(fila[2])),
+                        ft.DataCell(ft.Text(fila[3], color=color_texto, weight="bold")),
+                    ]
+                )
+            )
+        page.update()
+
+    def guardar_y_actualizar(e):
+        try:
+            val = float(valor_input.value)
+            # Lógica de detección: Si el valor es inusual, marcamos el error antes de tiempo
+            estado = "Normal"
+            if val > 100 or val < 10: # Ejemplo genérico de rango de alerta
+                estado = "ADVERTENCIA: Revisar Componente"
+            
+            ejecutar_query("INSERT INTO escaneos (sensor, valor, estado, fecha) VALUES (?, ?, ?, ?)",
+                           (sensor_input.value, val, estado, datetime.now().strftime("%H:%M:%S")))
+            
+            sensor_input.value = ""
+            valor_input.value = ""
+            refrescar_tabla()
+        except ValueError:
+            page.snack_bar = ft.SnackBar(ft.Text("Por favor, ingresa un número válido"))
+            page.snack_bar.open = True
+            page.update()
+
+    # Layout
+    page.add(
+        ft.Text("Panel de Diagnóstico Preventivo", size=30, weight="bold", color="blueaccent"),
+        ft.Row([sensor_input, valor_input, ft.ElevatedButton("Escanear", icon=ft.icons.SEARCH, on_click=guardar_y_actualizar)]),
+        ft.Divider(),
+        ft.Text("Últimos Registros del Sistema:", size=20, weight="w500"),
+        tabla_historial
+    )
+
+    # Cargar datos al iniciar
+    refrescar_tabla()
+
+db_init()
+ft.app(target=main)
