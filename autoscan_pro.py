@@ -33,12 +33,12 @@ def main(page: ft.Page):
     
     # Base de conocimientos de fallas para simular un escaneo de OBD-II
     componentes = [
-        {"nombre": "Motor", "icono": ft.icons.SETTINGS_APPLICATIONS, "fallas": ["Presión de aceite baja", "Bujías muy desgastadas", "Temperatura elevada", "Problema en inyectores"]},
-        {"nombre": "Frenos", "icono": ft.icons.ERROR, "fallas": ["Pastillas desgastadas", "Líquido de frenos bajo", "Discos alabeados", "Aire en el sistema"]},
-        {"nombre": "Batería", "icono": ft.icons.BATTERY_ALERT, "fallas": ["Voltaje muy bajo", "Alternador en mal estado", "Terminales sulfatados", "Celdas dañadas"]},
-        {"nombre": "Transmisión", "icono": ft.icons.SETTINGS, "fallas": ["Nivel de aceite bajo", "Filtro obstruido", "Sobrecalentamiento", "Patines en engranajes"]},
-        {"nombre": "Neumáticos", "icono": ft.icons.RADIO_BUTTON_UNCHECKED, "fallas": ["Presión crítica", "Desgaste irregular", "Pinchazo detectado", "Vida útil agotada"]},
-        {"nombre": "Suspensión", "icono": ft.icons.BUILD, "fallas": ["Amortiguadores con fugas", "Bujes desgastados", "Resortes vencidos", "Bieletas rotas"]}
+        {"nombre": "Motor", "icono": ft.Icons.SETTINGS_APPLICATIONS, "fallas": ["Presión de aceite baja", "Bujías muy desgastadas", "Temperatura elevada", "Problema en inyectores"]},
+        {"nombre": "Frenos", "icono": ft.Icons.ERROR, "fallas": ["Pastillas desgastadas", "Líquido de frenos bajo", "Discos alabeados", "Aire en el sistema"]},
+        {"nombre": "Batería", "icono": ft.Icons.BATTERY_ALERT, "fallas": ["Voltaje muy bajo", "Alternador en mal estado", "Terminales sulfatados", "Celdas dañadas"]},
+        {"nombre": "Transmisión", "icono": ft.Icons.SETTINGS, "fallas": ["Nivel de aceite bajo", "Filtro obstruido", "Sobrecalentamiento", "Patines en engranajes"]},
+        {"nombre": "Neumáticos", "icono": ft.Icons.RADIO_BUTTON_UNCHECKED, "fallas": ["Presión crítica", "Desgaste irregular", "Pinchazo detectado", "Vida útil agotada"]},
+        {"nombre": "Suspensión", "icono": ft.Icons.BUILD, "fallas": ["Amortiguadores con fugas", "Bujes desgastados", "Resortes vencidos", "Bieletas rotas"]}
     ]
 
     lbl_ultimo_escaneo = ft.Text("Último escaneo: Nunca", size=14, color="#94a3b8")
@@ -46,7 +46,7 @@ def main(page: ft.Page):
     # Encabezado (Header)
     header = ft.Row(
         controls=[
-            ft.Icon(ft.icons.DIRECTIONS_CAR, size=40, color="#38bdf8"), # Celeste
+            ft.Icon(ft.Icons.DIRECTIONS_CAR, size=40, color="#38bdf8"), # Celeste
             ft.Text("AutoScan Pro", size=32, weight=ft.FontWeight.BOLD, color="white"),
             ft.Container(expand=True),
             lbl_ultimo_escaneo
@@ -151,7 +151,7 @@ def main(page: ft.Page):
         page.update()
 
     btn_scan = ft.ElevatedButton(
-        content=ft.Row([ft.Icon(ft.icons.SEARCH), ft.Text("Iniciar Escaneo Computarizado", size=16, weight="bold")]),
+        content=ft.Row([ft.Icon(ft.Icons.SEARCH), ft.Text("Iniciar Escaneo Computarizado", size=16, weight="bold")]),
         style=ft.ButtonStyle(
             color="white",
             bgcolor="#0ea5e9",
@@ -190,6 +190,6 @@ def main(page: ft.Page):
 
 if __name__ == '__main__':
     db_init()
-    # Ejecutamos la app en modo web por el puerto 8550
-    print("Iniciando servidor web. Ingresa a: http://localhost:8550")
-    ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=8550)
+    # Ejecutamos la app en modo web sin puerto fijo para evitar errores
+    print("Iniciando servidor web...")
+    ft.app(target=main, view=ft.AppView.WEB_BROWSER)
